@@ -1,0 +1,234 @@
+/**
+ * Francy Stand Flip — CSS backend.
+ */
+
+.fsf-settings-wrap .fsf-intro {
+	max-width: 780px;
+	font-size: 13px;
+}
+
+.fsf-settings-layout {
+	display: flex;
+	align-items: flex-start;
+	gap: 24px;
+	margin-top: 16px;
+}
+
+.fsf-settings-form {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.fsf-preview-col {
+	flex: 0 0 420px;
+	max-width: 420px;
+}
+
+.fsf-preview-sticky {
+	position: sticky;
+	top: 50px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	padding: 16px 18px 18px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fsf-preview-sticky h2 {
+	margin-top: 0;
+}
+
+.fsf-card-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	padding: 4px 18px 8px;
+	margin-bottom: 18px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.fsf-card-panel h2 {
+	font-size: 15px;
+	margin: 14px 0 0;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.fsf-card-panel .form-table th {
+	width: 250px;
+	padding: 12px 10px 12px 0;
+	font-weight: 500;
+}
+
+.fsf-card-panel .form-table td {
+	padding: 10px 10px 10px 0;
+}
+
+.fsf-card-panel .form-table .description {
+	margin: 4px 0 0;
+	font-size: 12px;
+}
+
+/* Palco dell'anteprima: spazio abbondante per la carta che sborda */
+.fsf-preview-stage {
+	background:
+		linear-gradient(45deg, #f1f1f1 25%, transparent 25%, transparent 75%, #f1f1f1 75%),
+		linear-gradient(45deg, #f1f1f1 25%, #fff 25%, #fff 75%, #f1f1f1 75%);
+	background-size: 18px 18px;
+	background-position: 0 0, 9px 9px;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 56px;
+	overflow: auto;
+}
+
+.fsf-preview-stage .fsf-item {
+	max-width: 100%;
+}
+
+.fsf-preview-stage .fsf-box--preview .fsf-btn {
+	cursor: default;
+}
+
+.fsf-shortcode-help {
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.fsf-shortcode-help h3 {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+
+.fsf-shortcode-help p {
+	margin: 0 0 6px;
+	font-size: 12px;
+}
+
+/* Metabox */
+.fsf-meta-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 28px;
+}
+
+.fsf-meta-col {
+	flex: 1 1 320px;
+	min-width: 280px;
+}
+
+.fsf-meta-col h4 {
+	margin: 0 0 8px;
+}
+
+.fsf-media-field {
+	margin-bottom: 22px;
+}
+
+.fsf-media-field p {
+	margin: 0 0 6px;
+}
+
+.fsf-media-thumb {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 140px;
+	min-height: 100px;
+	padding: 6px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #f6f7f7;
+	margin-bottom: 8px;
+}
+
+.fsf-media-thumb img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
+.fsf-media-thumb.is-empty {
+	color: #8c8f94;
+	font-size: 12px;
+	font-style: italic;
+}
+
+.fsf-override-fields,
+.fsf-override-bg {
+	transition: opacity 0.15s ease;
+}
+
+.fsf-override-fields.is-disabled,
+.fsf-override-bg.is-disabled {
+	opacity: 0.45;
+}
+
+.fsf-override-fields p,
+.fsf-override-bg p {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 10px;
+}
+
+.fsf-override-fields label {
+	flex: 0 0 160px;
+}
+
+.fsf-override-fields input[type="number"] {
+	width: 90px;
+}
+
+/* Lista stand */
+.fsf-col-thumb {
+	width: 46px;
+	height: auto;
+	border-radius: 4px;
+	display: block;
+}
+
+.fsf-col-missing {
+	color: #a7aaad;
+}
+
+.fsf-copy-field {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 11px;
+	background: #f6f7f7;
+	cursor: pointer;
+	width: 100%;
+	max-width: 220px;
+}
+
+.fsf-copy-field.is-copied {
+	background: #e6f4ea;
+	border-color: #46b450;
+}
+
+.column-fsf_card,
+.column-fsf_stand {
+	width: 70px;
+}
+
+.column-fsf_links {
+	width: 110px;
+}
+
+@media (max-width: 1400px) {
+	.fsf-settings-layout {
+		flex-direction: column;
+	}
+
+	.fsf-preview-col {
+		flex: 1 1 auto;
+		max-width: 640px;
+		width: 100%;
+		order: -1;
+	}
+
+	.fsf-preview-sticky {
+		position: static;
+	}
+}

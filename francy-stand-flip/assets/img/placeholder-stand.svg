@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Foto stand segnaposto">
+  <defs>
+    <linearGradient id="fsfStandBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5b4a86"/>
+      <stop offset="1" stop-color="#241a3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#fsfStandBg)"/>
+  <rect x="120" y="150" width="560" height="26" rx="8" fill="#c9b8f2" opacity="0.55"/>
+  <rect x="120" y="330" width="560" height="26" rx="8" fill="#c9b8f2" opacity="0.55"/>
+  <rect x="120" y="500" width="560" height="30" rx="8" fill="#c9b8f2" opacity="0.7"/>
+  <g fill="#f0e8ff" opacity="0.85">
+    <path d="M210 150c0-26 14-46 32-46s32 20 32 46z"/>
+    <path d="M330 150c0-40 18-70 40-70s40 30 40 70z"/>
+    <path d="M480 150c0-30 16-52 34-52s34 22 34 52z"/>
+    <path d="M230 330c0-34 16-58 34-58s34 24 34 58z"/>
+    <path d="M400 330c0-46 20-80 44-80s44 34 44 80z"/>
+    <path d="M560 330c0-28 14-48 30-48s30 20 30 48z"/>
+    <path d="M300 500c0-52 22-92 50-92s50 40 50 92z"/>
+    <path d="M470 500c0-38 18-66 38-66s38 28 38 66z"/>
+  </g>
+  <text x="400" y="575" text-anchor="middle" font-family="Verdana, sans-serif" font-size="20" fill="#e6ddff" opacity="0.8">FOTO DELLO STAND</text>
+</svg>
