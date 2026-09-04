@@ -431,6 +431,8 @@
 		height: auto !important;
 	}
 
+	/* La foto prende un margine: resta una cornice di sfondo del box su cui la
+	   carta passa visibilmente prima di infilarsi dietro la foto. */
 	.fsf-box .fsf-stand {
 		position: relative !important;
 		order: 1;
@@ -438,11 +440,12 @@
 		right: auto !important;
 		bottom: auto !important;
 		left: auto !important;
-		width: 100% !important;
+		width: auto !important;
 		height: auto !important;
+		margin: 14px 14px 0 !important;
 		aspect-ratio: 16 / 9;
 		overflow: hidden !important;
-		border-radius: calc(var(--fsf-radius-n, 24) * 1px) calc(var(--fsf-radius-n, 24) * 1px) 0 0 !important;
+		border-radius: max(calc(var(--fsf-radius-n, 24) * 1px - 10px), 8px) !important;
 		-webkit-mask-image: none;
 		mask-image: none;
 	}
@@ -483,8 +486,13 @@
 		border-radius: min(calc(var(--fsf-btnr-n, 999) * 1px), 999px);
 	}
 
+	/* Carta ancorata all'angolo in alto a sinistra: sborda dal box, attraversa
+	   la cornice e sparisce dietro la foto. Mai sopra i testi. */
 	.fsf-box .fsf-card {
-		width: max(100px, calc(var(--fsf-card-w-n, 25) * 1%));
+		left: min(calc(var(--fsf-card-x-n, -10) * 1%), -6%);
+		top: 0;
+		width: max(96px, calc(var(--fsf-card-w-n, 25) * 1%));
+		transform: translateY(-18%) rotate(var(--fsf-card-rot, -8deg));
 		filter: drop-shadow(3px 6px 10px var(--fsf-cs-color, rgba(0, 0, 0, 0.45)));
 	}
 
@@ -508,11 +516,12 @@
 		right: auto !important;
 		bottom: auto !important;
 		left: auto !important;
-		width: 100% !important;
+		width: auto !important;
 		height: auto !important;
+		margin: 14px 14px 0 !important;
 		aspect-ratio: 16 / 9;
 		overflow: hidden !important;
-		border-radius: calc(var(--fsf-radius-n, 24) * 1px) calc(var(--fsf-radius-n, 24) * 1px) 0 0 !important;
+		border-radius: max(calc(var(--fsf-radius-n, 24) * 1px - 10px), 8px) !important;
 		-webkit-mask-image: none;
 		mask-image: none;
 	}
@@ -554,7 +563,10 @@
 	}
 
 	.fsf-box .fsf-card {
-		width: max(100px, calc(var(--fsf-card-w-n, 25) * 1%));
+		left: min(calc(var(--fsf-card-x-n, -10) * 1%), -6%);
+		top: 0;
+		width: max(96px, calc(var(--fsf-card-w-n, 25) * 1%));
+		transform: translateY(-18%) rotate(var(--fsf-card-rot, -8deg));
 	}
 
 	.fsf-grid {
