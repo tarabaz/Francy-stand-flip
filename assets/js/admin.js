@@ -170,6 +170,8 @@
 			'--fsf-valign': valign,
 			'--fsf-title-n': num( s.title_size ),
 			'--fsf-title-color': s.title_color,
+			'--fsf-title-below-color': s.title_below_color,
+			'--fsf-title-below-align': [ 'left', 'center', 'right' ].indexOf( s.title_below_align ) !== -1 ? s.title_below_align : 'center',
 			'--fsf-title-weight': num( s.title_weight ),
 			'--fsf-desc-n': num( s.desc_size ),
 			'--fsf-desc-color': s.desc_color,
@@ -258,15 +260,23 @@
 		}
 		$box.find( '.fsf-ico' ).toggle( on( settings.btn_icon ) );
 
+		// Titolo: dentro il box, sotto come didascalia, o nascosto.
+		var showTitle = on( settings.show_title );
+		var titleBelow = settings.title_pos === 'below';
+		$box.find( '.fsf-content .fsf-title' ).prop( 'hidden', ! showTitle || titleBelow );
+		$item.find( '.fsf-title--below' ).prop( 'hidden', ! showTitle || ! titleBelow );
+
 		var $title = $( '#title' );
 		if ( $title.length ) {
-			$box.find( '.fsf-title' ).text( $title.val() || fsfAdmin.i18n.noTitle );
+			$item.find( '.fsf-title' ).text( $title.val() || fsfAdmin.i18n.noTitle );
 		}
+
 		var $desc = $( '#fsf-desc' );
+		var descText = $desc.length ? $.trim( $desc.val() ) : $.trim( $box.find( '.fsf-desc' ).text() );
 		if ( $desc.length ) {
-			var text = $.trim( $desc.val() );
-			$box.find( '.fsf-desc' ).text( text ).prop( 'hidden', text === '' );
+			$box.find( '.fsf-desc' ).text( descText );
 		}
+		$box.find( '.fsf-desc' ).prop( 'hidden', ! on( settings.show_desc ) || descText === '' );
 	}
 
 	/**

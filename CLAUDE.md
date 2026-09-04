@@ -56,6 +56,10 @@ Con la **larghezza dinamica** `--fsf-u` torna a `1px` e si usano le variabili `*
 da PHP: chi aggiunge una misura che deve restare fissa in quella modalità deve esportare anche la
 sua versione in px.
 
+Il titolo-didascalia (`.fsf-title--below`) sta **fuori** da `.fsf-box`, dentro `.fsf-item`: lì
+`--fsf-u` non esiste, quindi usa px fissi e il suo colore dedicato. In anteprima entrambi i titoli
+vengono renderizzati e il JS nasconde quello inattivo.
+
 Avada sovrascrive colore e margini di `h3` e dei link: titolo, descrizione e pulsanti usano
 selettori rinforzati (`.fsf-box .fsf-content .fsf-title`) e `!important` sulle sole proprietà di
 colore. Non abbassare quella specificità.

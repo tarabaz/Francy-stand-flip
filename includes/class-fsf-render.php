@@ -216,6 +216,8 @@ class FSF_Render {
 			'--fsf-valign'        => in_array( $settings['content_valign'], array( 'start', 'center', 'end' ), true ) ? 'flex-' . $settings['content_valign'] : 'flex-end',
 			'--fsf-title-n'       => self::num( $settings['title_size'] ),
 			'--fsf-title-color'   => $settings['title_color'],
+			'--fsf-title-below-color' => $settings['title_below_color'],
+			'--fsf-title-below-align' => in_array( $settings['title_below_align'], array( 'left', 'center', 'right' ), true ) ? $settings['title_below_align'] : 'center',
 			'--fsf-title-weight'  => self::num( $settings['title_weight'] ),
 			'--fsf-desc-n'        => self::num( $settings['desc_size'] ),
 			'--fsf-desc-color'    => $settings['desc_color'],
@@ -430,6 +432,12 @@ class FSF_Render {
 		$target = '_self' === $settings['link_target'] ? '_self' : '_blank';
 		$rel    = '_blank' === $target ? ' rel="noopener noreferrer"' : '';
 
+		$show_title        = ! empty( $settings['show_title'] );
+		$title_below       = 'below' === $settings['title_pos'];
+		$show_title_inside = $show_title && ! $title_below;
+		$show_title_below  = $show_title && $title_below;
+		$show_desc         = ! empty( $settings['show_desc'] ) && '' !== $data['desc'];
+
 		$stand_html = '';
 		if ( $data['stand_id'] ) {
 			$stand_html = wp_get_attachment_image(
@@ -473,8 +481,12 @@ class FSF_Render {
 				<div class="fsf-stand"<?php echo $stand_html ? '' : ' hidden'; ?>><?php echo $stand_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 
 				<div class="fsf-content">
-					<h3 class="fsf-title"><?php echo esc_html( $data['title'] ); ?></h3>
-					<p class="fsf-desc"<?php echo $data['desc'] ? '' : ' hidden'; ?>><?php echo esc_html( $data['desc'] ); ?></p>
+					<?php if ( $show_title_inside || $preview ) : ?>
+						<h3 class="fsf-title"<?php echo $show_title_inside ? '' : ' hidden'; ?>><?php echo esc_html( $data['title'] ); ?></h3>
+					<?php endif; ?>
+					<?php if ( $show_desc || $preview ) : ?>
+						<p class="fsf-desc"<?php echo $show_desc ? '' : ' hidden'; ?>><?php echo esc_html( $data['desc'] ); ?></p>
+					<?php endif; ?>
 
 					<div class="fsf-actions">
 						<a class="fsf-btn fsf-btn--primary"
@@ -505,6 +517,10 @@ class FSF_Render {
 					</div>
 				</div>
 			</article>
+
+			<?php if ( $show_title_below || $preview ) : ?>
+				<h3 class="fsf-title fsf-title--below"<?php echo $show_title_below ? '' : ' hidden'; ?>><?php echo esc_html( $data['title'] ); ?></h3>
+			<?php endif; ?>
 		</div>
 		<?php
 		return trim( ob_get_clean() );

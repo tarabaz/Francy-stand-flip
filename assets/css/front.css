@@ -62,6 +62,10 @@
 	container-type: inline-size;
 }
 
+.fsf-item [hidden] {
+	display: none !important;
+}
+
 /* Larghezza dinamica: nessun massimo, solo un minimo */
 .fsf-item--fluid {
 	max-width: none;
@@ -288,6 +292,22 @@
 	overflow-wrap: break-word;
 }
 
+/* Titolo come didascalia sotto il box: sta sulla pagina, non sul box, quindi
+   ha colore proprio e misure in px (non scala con il box). */
+.fsf-item > .fsf-title--below {
+	display: block;
+	margin: 12px 2px 0 !important;
+	padding: 0 !important;
+	font-size: calc(var(--fsf-title-n, 24) * 1px);
+	line-height: 1.2;
+	font-weight: var(--fsf-title-weight, 700);
+	color: var(--fsf-title-below-color, #1c1033) !important;
+	text-align: var(--fsf-title-below-align, center);
+	letter-spacing: -0.01em;
+	overflow-wrap: break-word;
+	text-transform: none;
+}
+
 /* ---------- Pulsanti ---------- */
 
 .fsf-actions {
@@ -456,6 +476,27 @@
 		filter: none;
 	}
 
+	/* Foto libera: resta libera anche da stretto. Niente fascia 16/9 e niente
+	   ritaglio: la foto scontornata si vede intera, centrata, e continua a
+	   sbordare dal bordo alto come nel layout largo. */
+	.fsf-box--stand-free .fsf-stand {
+		width: min(92%, calc(var(--fsf-stand-w-n, 44) * 2%)) !important;
+		margin: calc(var(--fsf-stand-y-n, -8) * 1%) auto 0 !important;
+		aspect-ratio: auto !important;
+		overflow: visible !important;
+		border-radius: 0 !important;
+	}
+
+	.fsf-box--stand-free .fsf-stand__img {
+		height: auto;
+		object-fit: contain;
+		filter: drop-shadow(3px 8px 14px var(--fsf-cs-color, rgba(0, 0, 0, 0.45)));
+	}
+
+	.fsf-box--stand-free.fsf-box--no-card-shadow .fsf-stand__img {
+		filter: none;
+	}
+
 	.fsf-box .fsf-content {
 		position: relative !important;
 		order: 2;
@@ -529,6 +570,27 @@
 	.fsf-box .fsf-stand__img {
 		height: 100%;
 		object-fit: cover;
+		filter: none;
+	}
+
+	/* Foto libera: resta libera anche da stretto. Niente fascia 16/9 e niente
+	   ritaglio: la foto scontornata si vede intera, centrata, e continua a
+	   sbordare dal bordo alto come nel layout largo. */
+	.fsf-box--stand-free .fsf-stand {
+		width: min(92%, calc(var(--fsf-stand-w-n, 44) * 2%)) !important;
+		margin: calc(var(--fsf-stand-y-n, -8) * 1%) auto 0 !important;
+		aspect-ratio: auto !important;
+		overflow: visible !important;
+		border-radius: 0 !important;
+	}
+
+	.fsf-box--stand-free .fsf-stand__img {
+		height: auto;
+		object-fit: contain;
+		filter: drop-shadow(3px 8px 14px var(--fsf-cs-color, rgba(0, 0, 0, 0.45)));
+	}
+
+	.fsf-box--stand-free.fsf-box--no-card-shadow .fsf-stand__img {
 		filter: none;
 	}
 

@@ -99,8 +99,10 @@ poi salvi).
   larghezza, rotazione in gradi, arrotondamento, ombra dedicata con offset/sfocatura/colore/opacità.
 - **Immagine stand**: lato (destra/sinistra), larghezza dell'area, `cover`/`contain`, messa a
   fuoco, margine interno, sfumatura di raccordo verso i testi e **foto libera** (vedi sotto).
-- **Testi**: padding, larghezza colonna testi, allineamento verticale, dimensioni e colori di
-  titolo e descrizione, numero massimo di righe della descrizione.
+- **Testi**: spunte separate per **mostrare titolo** e **mostrare descrizione** (togliendoli il
+  box si ricompone da solo e restano i pulsanti), **posizione del titolo** dentro il box o come
+  didascalia sotto, padding, larghezza colonna testi, allineamento verticale, dimensioni e colori,
+  numero massimo di righe della descrizione.
 - **Pulsanti**: stile del pulsante post (**colori Instagram** o personalizzati), dimensione,
   arrotondamento, colori, icona on/off, etichette, target link.
 - **Griglia**: colonne desktop/tablet/mobile, gap, margine automatico per ciò che sborda.
@@ -130,6 +132,16 @@ costante e tutto il contenuto che scala insieme al box.
 Con la spunta attiva la foto dello stand non è più ritagliata dentro il riquadro: si posiziona
 con coordinate proprie e può sbordare dal box come la carta. Conviene una foto **scontornata in
 PNG**. La sfumatura di raccordo non si applica in questa modalità.
+
+Anche nel layout stretto la foto libera resta libera: niente fascia 16:9 e niente ritaglio, viene
+mostrata intera e centrata e continua a sbordare dal bordo alto. Solo le foto in modalità riquadro
+diventano una fascia 16:9 sopra i testi.
+
+### Titolo come didascalia
+
+Con *Posizione del titolo → sotto il box* il titolo esce dal box e diventa una didascalia sulla
+pagina. Siccome lì il fondo non è più il box ma la pagina, ha **colore e allineamento propri** e
+una dimensione fissa in px (non scala con il box).
 
 ---
 
