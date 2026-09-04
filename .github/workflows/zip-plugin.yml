@@ -23,13 +23,12 @@ jobs:
       - name: Prepara la cartella del plugin
         run: |
           mkdir -p build/francy-stand-flip
-          rsync -a \
-            --exclude 'build' \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude 'docs' \
-            --exclude 'CLAUDE.md' \
-            ./ build/francy-stand-flip/
+          tar --exclude='./build' \
+              --exclude='./.git' \
+              --exclude='./.github' \
+              --exclude='./docs' \
+              --exclude='./CLAUDE.md' \
+              -cf - . | tar -xf - -C build/francy-stand-flip
           cd build && zip -rq ../francy-stand-flip.zip francy-stand-flip
           unzip -l ../francy-stand-flip.zip | head -20
 
