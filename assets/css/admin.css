@@ -156,16 +156,19 @@
 }
 
 .fsf-override-fields,
+.fsf-override-stand,
 .fsf-override-bg {
 	transition: opacity 0.15s ease;
 }
 
 .fsf-override-fields.is-disabled,
+.fsf-override-stand.is-disabled,
 .fsf-override-bg.is-disabled {
 	opacity: 0.45;
 }
 
 .fsf-override-fields p,
+.fsf-override-stand p,
 .fsf-override-bg p {
 	display: flex;
 	align-items: center;
@@ -173,11 +176,13 @@
 	margin: 0 0 10px;
 }
 
-.fsf-override-fields label {
-	flex: 0 0 160px;
+.fsf-override-fields label,
+.fsf-override-stand label {
+	flex: 0 0 210px;
 }
 
-.fsf-override-fields input[type="number"] {
+.fsf-override-fields input[type="number"],
+.fsf-override-stand input[type="number"] {
 	width: 90px;
 }
 

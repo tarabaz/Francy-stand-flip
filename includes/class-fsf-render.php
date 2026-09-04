@@ -86,6 +86,10 @@ class FSF_Render {
 			'bg_ovr'    => 0,
 			'bg_color'  => $settings['bg_color'],
 			'bg_color2' => $settings['bg_color2'],
+			'stand_ovr' => 0,
+			'stand_x'   => $settings['stand_free'] ? $settings['stand_x'] : 50,
+			'stand_y'   => $settings['stand_free'] ? $settings['stand_y'] : 50,
+			'stand_w'   => $settings['stand_w'],
 		);
 
 		if ( ! $post_id ) {
@@ -127,6 +131,13 @@ class FSF_Render {
 			$data['bg_color2'] = FSF_Metabox::meta( $post_id, '_fsf_bg_color2', $settings['bg_color2'] );
 		}
 
+		$data['stand_ovr'] = (int) FSF_Metabox::meta( $post_id, '_fsf_stand_ovr', 0 );
+		if ( $data['stand_ovr'] ) {
+			$data['stand_x'] = FSF_Metabox::meta( $post_id, '_fsf_stand_x', $data['stand_x'] );
+			$data['stand_y'] = FSF_Metabox::meta( $post_id, '_fsf_stand_y', $data['stand_y'] );
+			$data['stand_w'] = FSF_Metabox::meta( $post_id, '_fsf_stand_w', $data['stand_w'] );
+		}
+
 		return $data;
 	}
 
@@ -142,48 +153,79 @@ class FSF_Render {
 			? sprintf( 'linear-gradient(%sdeg, %s 0%%, %s 100%%)', self::num( $settings['bg_angle'] ), $data['bg_color'], $data['bg_color2'] )
 			: $data['bg_color'];
 
+		$box_w = max( 1, (float) $settings['box_w'] );
+		$box_h = max( 1, (float) $settings['box_h'] );
+
+		// Equivalenti in px, usati quando la larghezza è dinamica: lì il box si
+		// allarga ma carta, testi e foto devono restare della misura di progetto.
+		$card_xpx    = 'percent' === $settings['card_unit'] ? $box_w * (float) $data['card_x'] / 100 : (float) $data['card_x'];
+		$card_ypx    = 'percent' === $settings['card_unit'] ? $box_h * (float) $data['card_y'] / 100 : (float) $data['card_y'];
+		$card_wpx    = 'percent' === $settings['card_w_unit'] ? $box_w * (float) $data['card_w'] / 100 : (float) $data['card_w'];
+		$stand_xpx   = $box_w * (float) $data['stand_x'] / 100;
+		$stand_ypx   = $box_h * (float) $data['stand_y'] / 100;
+		$stand_wpx   = $box_w * (float) $data['stand_w'] / 100;
+		$content_wpx = $box_w * (float) $settings['content_w'] / 100;
+
+		// Nel riquadro classico l'override per singolo stand regola la messa a
+		// fuoco della foto (object-position), non una posizione assoluta.
+		$objpos = $settings['stand_pos'];
+		if ( empty( $settings['stand_free'] ) && ! empty( $data['stand_ovr'] ) ) {
+			$objpos = self::num( max( 0, min( 100, (float) $data['stand_x'] ) ) ) . '% ' . self::num( max( 0, min( 100, (float) $data['stand_y'] ) ) ) . '%';
+		}
+
 		return array(
-			'--fsf-boxw'         => self::num( $settings['box_w'] ),
-			'--fsf-box-max'      => self::num( $settings['box_w'] ) . 'px',
-			'--fsf-ratio'        => self::num( $settings['box_w'] ) . ' / ' . self::num( $settings['box_h'] ),
-			'--fsf-radius-n'     => self::num( $settings['radius'] ),
-			'--fsf-bg'           => $bg,
-			'--fsf-border-n'     => self::num( $settings['border_w'] ),
-			'--fsf-border-color' => self::rgba( $settings['border_color'], $settings['border_opacity'] ),
-			'--fsf-bsy-n'        => self::num( $settings['box_shadow_y'] ),
-			'--fsf-bsb-n'        => self::num( $settings['box_shadow_blur'] ),
-			'--fsf-bs-color'     => self::rgba( $settings['box_shadow_color'], $settings['box_shadow_opacity'] ),
+			'--fsf-boxw'          => self::num( $settings['box_w'] ),
+			'--fsf-boxh-n'        => self::num( $settings['box_h'] ),
+			'--fsf-box-max'       => self::num( $settings['box_w'] ) . 'px',
+			'--fsf-minw-n'        => self::num( $settings['min_w'] ),
+			'--fsf-ratio'         => self::num( $settings['box_w'] ) . ' / ' . self::num( $settings['box_h'] ),
+			'--fsf-radius-n'      => self::num( $settings['radius'] ),
+			'--fsf-bg'            => $bg,
+			'--fsf-border-n'      => self::num( $settings['border_w'] ),
+			'--fsf-border-color'  => self::rgba( $settings['border_color'], $settings['border_opacity'] ),
+			'--fsf-bsy-n'         => self::num( $settings['box_shadow_y'] ),
+			'--fsf-bsb-n'         => self::num( $settings['box_shadow_blur'] ),
+			'--fsf-bs-color'      => self::rgba( $settings['box_shadow_color'], $settings['box_shadow_opacity'] ),
 
-			'--fsf-card-x-n'     => self::num( $data['card_x'] ),
-			'--fsf-card-y-n'     => self::num( $data['card_y'] ),
-			'--fsf-card-w-n'     => self::num( $data['card_w'] ),
-			'--fsf-card-rot'     => self::num( $data['card_rot'] ) . 'deg',
+			'--fsf-card-x-n'      => self::num( $data['card_x'] ),
+			'--fsf-card-y-n'      => self::num( $data['card_y'] ),
+			'--fsf-card-w-n'      => self::num( $data['card_w'] ),
+			'--fsf-card-xpx-n'    => self::num( $card_xpx ),
+			'--fsf-card-ypx-n'    => self::num( $card_ypx ),
+			'--fsf-card-wpx-n'    => self::num( $card_wpx ),
+			'--fsf-card-rot'      => self::num( $data['card_rot'] ) . 'deg',
 			'--fsf-card-radius-n' => self::num( $settings['card_radius'] ),
-			'--fsf-csx-n'        => self::num( $settings['card_shadow_x'] ),
-			'--fsf-csy-n'        => self::num( $settings['card_shadow_y'] ),
-			'--fsf-csb-n'        => self::num( $settings['card_shadow_blur'] ),
-			'--fsf-cs-color'     => self::rgba( $settings['card_shadow_color'], $settings['card_shadow_opacity'] ),
+			'--fsf-csx-n'         => self::num( $settings['card_shadow_x'] ),
+			'--fsf-csy-n'         => self::num( $settings['card_shadow_y'] ),
+			'--fsf-csb-n'         => self::num( $settings['card_shadow_blur'] ),
+			'--fsf-cs-color'      => self::rgba( $settings['card_shadow_color'], $settings['card_shadow_opacity'] ),
 
-			'--fsf-stand-w'      => self::num( $settings['stand_w'] ) . '%',
-			'--fsf-stand-fit'    => 'contain' === $settings['stand_fit'] ? 'contain' : 'cover',
-			'--fsf-stand-pos'    => $settings['stand_pos'],
+			'--fsf-stand-w-n'     => self::num( $data['stand_w'] ),
+			'--fsf-stand-x-n'     => self::num( $data['stand_x'] ),
+			'--fsf-stand-y-n'     => self::num( $data['stand_y'] ),
+			'--fsf-stand-xpx-n'   => self::num( $stand_xpx ),
+			'--fsf-stand-ypx-n'   => self::num( $stand_ypx ),
+			'--fsf-stand-wpx-n'   => self::num( $stand_wpx ),
+			'--fsf-stand-fit'     => 'contain' === $settings['stand_fit'] ? 'contain' : 'cover',
+			'--fsf-stand-objpos'  => $objpos,
 			'--fsf-stand-inset-n' => self::num( $settings['stand_inset'] ),
 
-			'--fsf-pad-n'        => self::num( $settings['inner_pad'] ),
-			'--fsf-content-w'    => self::num( $settings['content_w'] ) . '%',
-			'--fsf-valign'       => in_array( $settings['content_valign'], array( 'start', 'center', 'end' ), true ) ? 'flex-' . $settings['content_valign'] : 'flex-end',
-			'--fsf-title-n'      => self::num( $settings['title_size'] ),
-			'--fsf-title-color'  => $settings['title_color'],
-			'--fsf-title-weight' => self::num( $settings['title_weight'] ),
-			'--fsf-desc-n'       => self::num( $settings['desc_size'] ),
-			'--fsf-desc-color'   => $settings['desc_color'],
-			'--fsf-desc-lines'   => (int) $settings['desc_lines'],
+			'--fsf-pad-n'         => self::num( $settings['inner_pad'] ),
+			'--fsf-content-w-n'   => self::num( $settings['content_w'] ),
+			'--fsf-content-wpx-n' => self::num( $content_wpx ),
+			'--fsf-valign'        => in_array( $settings['content_valign'], array( 'start', 'center', 'end' ), true ) ? 'flex-' . $settings['content_valign'] : 'flex-end',
+			'--fsf-title-n'       => self::num( $settings['title_size'] ),
+			'--fsf-title-color'   => $settings['title_color'],
+			'--fsf-title-weight'  => self::num( $settings['title_weight'] ),
+			'--fsf-desc-n'        => self::num( $settings['desc_size'] ),
+			'--fsf-desc-color'    => $settings['desc_color'],
+			'--fsf-desc-lines'    => (int) $settings['desc_lines'],
 
-			'--fsf-btn-n'        => self::num( $settings['btn_size'] ),
-			'--fsf-btnr-n'       => self::num( $settings['btn_radius'] ),
-			'--fsf-btn-bg'       => $settings['btn_bg'],
-			'--fsf-btn-color'    => $settings['btn_color'],
-			'--fsf-btn2-color'   => $settings['btn2_color'],
+			'--fsf-btn-n'         => self::num( $settings['btn_size'] ),
+			'--fsf-btnr-n'        => self::num( $settings['btn_radius'] ),
+			'--fsf-btn-bg'        => $settings['btn_bg'],
+			'--fsf-btn-color'     => $settings['btn_color'],
+			'--fsf-btn2-color'    => $settings['btn2_color'],
 		);
 	}
 
@@ -217,6 +259,15 @@ class FSF_Render {
 		}
 		if ( ! $settings['card_shadow'] ) {
 			$classes[] = 'fsf-box--no-card-shadow';
+		}
+		if ( $settings['stand_free'] ) {
+			$classes[] = 'fsf-box--stand-free';
+		}
+		if ( $settings['fluid'] ) {
+			$classes[] = 'fsf-box--fluid';
+		}
+		if ( 'custom' !== $settings['btn_post_style'] ) {
+			$classes[] = 'fsf-box--ig-btn';
 		}
 		if ( ! empty( $args['preview'] ) ) {
 			$classes[] = 'fsf-box--preview';
@@ -254,6 +305,24 @@ class FSF_Render {
 			$pad_t = max( 0, -( $card_y - $rot_h ) ) + 8;
 			$pad_r = max( 0, ( $card_x + $card_w + $rot_w ) - $box_w ) + 8;
 			$pad_b = max( 0, ( $card_y + $card_h + $rot_h ) - $box_h ) + 8;
+
+			// Con la foto libera sborda anche l'immagine dello stand: è ancorata
+			// al lato scelto, quindi contribuisce a quel lato più alto e basso.
+			if ( $settings['stand_free'] ) {
+				$s_w = $box_w * (float) $settings['stand_w'] / 100;
+				$s_h = $s_w * 1.1; // stima prudente dell'altezza della foto.
+				$s_x = $box_w * (float) $settings['stand_x'] / 100;
+				$s_y = $box_h * (float) $settings['stand_y'] / 100;
+
+				$side_pad = max( 0, -$s_x ) + 8;
+				if ( 'left' === $settings['stand_side'] ) {
+					$pad_l = max( $pad_l, $side_pad );
+				} else {
+					$pad_r = max( $pad_r, $side_pad );
+				}
+				$pad_t = max( $pad_t, max( 0, -$s_y ) + 8 );
+				$pad_b = max( $pad_b, max( 0, ( $s_y + $s_h ) - $box_h ) + 8 );
+			}
 		} else {
 			$pad_l = (float) $settings['grid_pad'];
 			$pad_t = $pad_l;
@@ -261,15 +330,23 @@ class FSF_Render {
 			$pad_b = $pad_l;
 		}
 
+		// Con più colonne la parte che sborda finisce nello spazio tra i box:
+		// il gap non può essere più stretto dell'ingombro, altrimenti la carta di
+		// un box va sopra quello accanto.
+		$gap_min  = $settings['pad_auto'] ? ceil( $pad_l + $pad_r ) : 0;
+		$rgap_min = $settings['pad_auto'] ? ceil( $pad_t + $pad_b ) : 0;
+
 		return array(
-			'--fsf-cols'   => $cols,
-			'--fsf-cols-t' => max( 1, min( (int) $settings['cols_tablet'], $cols ) ),
-			'--fsf-cols-m' => max( 1, min( (int) $settings['cols_mobile'], $cols ) ),
-			'--fsf-gap'    => self::num( max( 0, $gap ) ) . 'px',
-			'--fsf-gpad-t' => self::num( ceil( $pad_t ) ) . 'px',
-			'--fsf-gpad-r' => self::num( ceil( $pad_r ) ) . 'px',
-			'--fsf-gpad-b' => self::num( ceil( $pad_b ) ) . 'px',
-			'--fsf-gpad-l' => self::num( ceil( $pad_l ) ) . 'px',
+			'--fsf-cols'     => $cols,
+			'--fsf-cols-t'   => max( 1, min( (int) $settings['cols_tablet'], $cols ) ),
+			'--fsf-cols-m'   => max( 1, min( (int) $settings['cols_mobile'], $cols ) ),
+			'--fsf-gap'      => self::num( max( 0, $gap ) ) . 'px',
+			'--fsf-gap-min'  => self::num( $gap_min ) . 'px',
+			'--fsf-rgap-min' => self::num( $rgap_min ) . 'px',
+			'--fsf-gpad-t'   => self::num( ceil( $pad_t ) ) . 'px',
+			'--fsf-gpad-r'   => self::num( ceil( $pad_r ) ) . 'px',
+			'--fsf-gpad-b'   => self::num( ceil( $pad_b ) ) . 'px',
+			'--fsf-gpad-l'   => self::num( ceil( $pad_l ) ) . 'px',
 		);
 	}
 
@@ -338,6 +415,9 @@ class FSF_Render {
 		$data    = self::stand_data( $post_id, $settings );
 
 		$item_classes = array( 'fsf-item' );
+		if ( $settings['fluid'] ) {
+			$item_classes[] = 'fsf-item--fluid';
+		}
 		if ( $args['class'] ) {
 			foreach ( explode( ' ', $args['class'] ) as $class ) {
 				$class = sanitize_html_class( $class );
@@ -386,44 +466,44 @@ class FSF_Render {
 		?>
 		<div class="<?php echo esc_attr( implode( ' ', $item_classes ) ); ?>" style="<?php echo esc_attr( self::style_attr( self::box_vars( $settings, $data ) ) ); ?>"<?php echo $data['id'] ? ' data-fsf-id="' . (int) $data['id'] . '"' : ''; ?>>
 			<article class="<?php echo esc_attr( implode( ' ', self::box_classes( $settings, $args ) ) ); ?>">
-				<div class="fsf-box__inner">
-					<div class="fsf-stand"><?php echo $stand_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-
-					<div class="fsf-content">
-						<h3 class="fsf-title"><?php echo esc_html( $data['title'] ); ?></h3>
-						<p class="fsf-desc"<?php echo $data['desc'] ? '' : ' hidden'; ?>><?php echo esc_html( $data['desc'] ); ?></p>
-
-						<div class="fsf-actions">
-							<a class="fsf-btn fsf-btn--primary"
-								href="<?php echo esc_url( $data['ig_post'] ? $data['ig_post'] : '#' ); ?>"
-								target="<?php echo esc_attr( $target ); ?>"<?php echo $rel; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<?php echo ( $data['ig_post'] || $preview ) ? '' : 'hidden'; ?>>
-								<?php
-								if ( $settings['btn_icon'] ) {
-									echo self::ig_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-								}
-								?>
-								<span class="fsf-btn__label"><?php echo esc_html( $settings['label_post'] ); ?></span>
-								<span class="screen-reader-text"> — <?php echo esc_html( $data['title'] ); ?></span>
-							</a>
-
-							<a class="fsf-btn fsf-btn--ghost"
-								href="<?php echo esc_url( $data['ig_reel'] ? $data['ig_reel'] : '#' ); ?>"
-								target="<?php echo esc_attr( $target ); ?>"<?php echo $rel; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<?php echo ( $data['ig_reel'] || $preview ) ? '' : 'hidden'; ?>>
-								<?php
-								if ( $settings['btn_icon'] ) {
-									echo self::reel_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-								}
-								?>
-								<span class="fsf-btn__label"><?php echo esc_html( $settings['label_reel'] ); ?></span>
-								<span class="screen-reader-text"> — <?php echo esc_html( $data['title'] ); ?></span>
-							</a>
-						</div>
-					</div>
-				</div>
+				<div class="fsf-box__inner"></div>
 
 				<div class="fsf-card"<?php echo $card_html ? '' : ' hidden'; ?>><?php echo $card_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+
+				<div class="fsf-stand"<?php echo $stand_html ? '' : ' hidden'; ?>><?php echo $stand_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+
+				<div class="fsf-content">
+					<h3 class="fsf-title"><?php echo esc_html( $data['title'] ); ?></h3>
+					<p class="fsf-desc"<?php echo $data['desc'] ? '' : ' hidden'; ?>><?php echo esc_html( $data['desc'] ); ?></p>
+
+					<div class="fsf-actions">
+						<a class="fsf-btn fsf-btn--primary"
+							href="<?php echo esc_url( $data['ig_post'] ? $data['ig_post'] : '#' ); ?>"
+							target="<?php echo esc_attr( $target ); ?>"<?php echo $rel; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo ( $data['ig_post'] || $preview ) ? '' : 'hidden'; ?>>
+							<?php
+							if ( $settings['btn_icon'] ) {
+								echo self::ig_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							}
+							?>
+							<span class="fsf-btn__label"><?php echo esc_html( $settings['label_post'] ); ?></span>
+							<span class="screen-reader-text"> — <?php echo esc_html( $data['title'] ); ?></span>
+						</a>
+
+						<a class="fsf-btn fsf-btn--ghost"
+							href="<?php echo esc_url( $data['ig_reel'] ? $data['ig_reel'] : '#' ); ?>"
+							target="<?php echo esc_attr( $target ); ?>"<?php echo $rel; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo ( $data['ig_reel'] || $preview ) ? '' : 'hidden'; ?>>
+							<?php
+							if ( $settings['btn_icon'] ) {
+								echo self::reel_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							}
+							?>
+							<span class="fsf-btn__label"><?php echo esc_html( $settings['label_reel'] ); ?></span>
+							<span class="screen-reader-text"> — <?php echo esc_html( $data['title'] ); ?></span>
+						</a>
+					</div>
+				</div>
 			</article>
 		</div>
 		<?php

@@ -7,6 +7,7 @@
 	}
 
 	var CARD_KEYS = [ 'card_x', 'card_y', 'card_w', 'card_rot' ];
+	var STAND_KEYS = [ 'stand_x', 'stand_y', 'stand_w' ];
 	var BG_KEYS = [ 'bg_color', 'bg_color2' ];
 
 	/**
@@ -18,6 +19,14 @@
 			n = 0;
 		}
 		return String( Math.round( n * 1000 ) / 1000 );
+	}
+
+	function clamp( value, min, max ) {
+		return Math.max( min, Math.min( max, parseFloat( value ) || 0 ) );
+	}
+
+	function on( value ) {
+		return parseInt( value, 10 ) === 1;
 	}
 
 	/**
@@ -39,23 +48,30 @@
 
 	/**
 	 * Impostazioni correnti: globali + valori attualmente nel form.
+	 * Le sezioni di override valgono solo se la relativa spunta è attiva.
 	 */
 	function currentSettings() {
 		var settings = $.extend( {}, fsfAdmin.settings );
 
-		var $override = $( 'input[name="_fsf_override"]' );
+		var $cardOvr = $( 'input[name="_fsf_override"]' );
+		var $standOvr = $( 'input[name="_fsf_stand_ovr"]' );
 		var $bgOvr = $( 'input[name="_fsf_bg_ovr"]' );
-		var cardEnabled = ! $override.length || $override.is( ':checked' );
+
+		var cardEnabled = ! $cardOvr.length || $cardOvr.is( ':checked' );
+		var standEnabled = ! $standOvr.length || $standOvr.is( ':checked' );
 		var bgEnabled = ! $bgOvr.length || $bgOvr.is( ':checked' );
 
 		$( '[data-fsf-key]' ).each( function () {
 			var $el = $( this );
 			var key = $el.data( 'fsfKey' );
 
-			if ( ! key || key.indexOf( '_fsf_' ) === 0 ) {
+			if ( ! key || String( key ).indexOf( '_fsf_' ) === 0 ) {
 				return;
 			}
 			if ( ! cardEnabled && CARD_KEYS.indexOf( key ) !== -1 ) {
+				return;
+			}
+			if ( ! standEnabled && STAND_KEYS.indexOf( key ) !== -1 ) {
 				return;
 			}
 			if ( ! bgEnabled && BG_KEYS.indexOf( key ) !== -1 ) {
@@ -76,6 +92,9 @@
 			settings[ key ] = value;
 		} );
 
+		// Vero solo nella schermata dello stand, con la spunta attiva.
+		settings.__standOvr = $standOvr.length > 0 && $standOvr.is( ':checked' );
+
 		return settings;
 	}
 
@@ -91,9 +110,28 @@
 			? 'flex-' + s.content_valign
 			: 'flex-end';
 
+		var boxW = Math.max( 1, parseFloat( s.box_w ) || 560 );
+		var boxH = Math.max( 1, parseFloat( s.box_h ) || 320 );
+		var free = on( s.stand_free );
+
+		// Posizione/scala effettiva della foto: come in PHP.
+		var standX = ( s.__standOvr || free ) ? parseFloat( s.stand_x ) : 50;
+		var standY = ( s.__standOvr || free ) ? parseFloat( s.stand_y ) : 50;
+		var standW = parseFloat( s.stand_w );
+
+		var objpos = ( ! free && s.__standOvr )
+			? num( clamp( standX, 0, 100 ) ) + '% ' + num( clamp( standY, 0, 100 ) ) + '%'
+			: s.stand_pos;
+
+		var cardXpx = s.card_unit === 'px' ? parseFloat( s.card_x ) : boxW * parseFloat( s.card_x ) / 100;
+		var cardYpx = s.card_unit === 'px' ? parseFloat( s.card_y ) : boxH * parseFloat( s.card_y ) / 100;
+		var cardWpx = s.card_w_unit === 'px' ? parseFloat( s.card_w ) : boxW * parseFloat( s.card_w ) / 100;
+
 		return {
 			'--fsf-boxw': num( s.box_w ),
+			'--fsf-boxh-n': num( s.box_h ),
 			'--fsf-box-max': num( s.box_w ) + 'px',
+			'--fsf-minw-n': num( s.min_w ),
 			'--fsf-ratio': num( s.box_w ) + ' / ' + num( s.box_h ),
 			'--fsf-radius-n': num( s.radius ),
 			'--fsf-bg': bg,
@@ -106,6 +144,9 @@
 			'--fsf-card-x-n': num( s.card_x ),
 			'--fsf-card-y-n': num( s.card_y ),
 			'--fsf-card-w-n': num( s.card_w ),
+			'--fsf-card-xpx-n': num( cardXpx ),
+			'--fsf-card-ypx-n': num( cardYpx ),
+			'--fsf-card-wpx-n': num( cardWpx ),
 			'--fsf-card-rot': num( s.card_rot ) + 'deg',
 			'--fsf-card-radius-n': num( s.card_radius ),
 			'--fsf-csx-n': num( s.card_shadow_x ),
@@ -113,20 +154,26 @@
 			'--fsf-csb-n': num( s.card_shadow_blur ),
 			'--fsf-cs-color': rgba( s.card_shadow_color, s.card_shadow_opacity ),
 
-			'--fsf-stand-w': num( s.stand_w ) + '%',
+			'--fsf-stand-w-n': num( standW ),
+			'--fsf-stand-x-n': num( standX ),
+			'--fsf-stand-y-n': num( standY ),
+			'--fsf-stand-xpx-n': num( boxW * standX / 100 ),
+			'--fsf-stand-ypx-n': num( boxH * standY / 100 ),
+			'--fsf-stand-wpx-n': num( boxW * standW / 100 ),
 			'--fsf-stand-fit': s.stand_fit === 'contain' ? 'contain' : 'cover',
-			'--fsf-stand-pos': s.stand_pos,
+			'--fsf-stand-objpos': objpos,
 			'--fsf-stand-inset-n': num( s.stand_inset ),
 
 			'--fsf-pad-n': num( s.inner_pad ),
-			'--fsf-content-w': num( s.content_w ) + '%',
+			'--fsf-content-w-n': num( s.content_w ),
+			'--fsf-content-wpx-n': num( boxW * parseFloat( s.content_w ) / 100 ),
 			'--fsf-valign': valign,
 			'--fsf-title-n': num( s.title_size ),
 			'--fsf-title-color': s.title_color,
 			'--fsf-title-weight': num( s.title_weight ),
 			'--fsf-desc-n': num( s.desc_size ),
 			'--fsf-desc-color': s.desc_color,
-			'--fsf-desc-lines': parseInt( s.desc_lines, 10 ) || 3,
+			'--fsf-desc-lines': parseInt( s.desc_lines, 10 ) || 2,
 
 			'--fsf-btn-n': num( s.btn_size ),
 			'--fsf-btnr-n': num( s.btn_radius ),
@@ -151,17 +198,26 @@
 		if ( s.stand_side === 'left' ) {
 			classes.push( 'fsf-box--flip' );
 		}
-		if ( parseInt( s.stand_fade, 10 ) === 1 ) {
+		if ( on( s.stand_fade ) ) {
 			classes.push( 'fsf-box--fade' );
 		}
 		if ( parseFloat( s.stand_inset ) > 0 ) {
 			classes.push( 'fsf-box--stand-inset' );
 		}
-		if ( parseInt( s.box_shadow, 10 ) !== 1 ) {
+		if ( ! on( s.box_shadow ) ) {
 			classes.push( 'fsf-box--no-shadow' );
 		}
-		if ( parseInt( s.card_shadow, 10 ) !== 1 ) {
+		if ( ! on( s.card_shadow ) ) {
 			classes.push( 'fsf-box--no-card-shadow' );
+		}
+		if ( on( s.stand_free ) ) {
+			classes.push( 'fsf-box--stand-free' );
+		}
+		if ( on( s.fluid ) ) {
+			classes.push( 'fsf-box--fluid' );
+		}
+		if ( s.btn_post_style !== 'custom' ) {
+			classes.push( 'fsf-box--ig-btn' );
 		}
 
 		return classes.join( ' ' );
@@ -191,16 +247,16 @@
 		} );
 
 		$item.attr( 'style', style.join( ';' ) );
+		$item.attr( 'class', on( settings.fluid ) ? 'fsf-item fsf-item--fluid' : 'fsf-item' );
 		$box.attr( 'class', buildClasses( settings ) );
 
-		// Etichette dei pulsanti e testi (solo dove i campi esistono).
 		if ( settings.label_post ) {
 			$box.find( '.fsf-btn--primary .fsf-btn__label' ).text( settings.label_post );
 		}
 		if ( settings.label_reel ) {
 			$box.find( '.fsf-btn--ghost .fsf-btn__label' ).text( settings.label_reel );
 		}
-		$box.find( '.fsf-ico' ).toggle( parseInt( settings.btn_icon, 10 ) === 1 );
+		$box.find( '.fsf-ico' ).toggle( on( settings.btn_icon ) );
 
 		var $title = $( '#title' );
 		if ( $title.length ) {
@@ -214,17 +270,19 @@
 	}
 
 	/**
-	 * Abilita/disabilita i campi di override.
+	 * Abilita/disabilita visivamente i campi di override.
 	 */
 	function syncOverrideState() {
-		var $override = $( 'input[name="_fsf_override"]' );
-		if ( $override.length ) {
-			$( '.fsf-override-fields' ).toggleClass( 'is-disabled', ! $override.is( ':checked' ) );
-		}
-		var $bgOvr = $( 'input[name="_fsf_bg_ovr"]' );
-		if ( $bgOvr.length ) {
-			$( '.fsf-override-bg' ).toggleClass( 'is-disabled', ! $bgOvr.is( ':checked' ) );
-		}
+		$( [
+			[ '_fsf_override', '.fsf-override-fields' ],
+			[ '_fsf_stand_ovr', '.fsf-override-stand' ],
+			[ '_fsf_bg_ovr', '.fsf-override-bg' ]
+		] ).each( function ( index, pair ) {
+			var $checkbox = $( 'input[name="' + pair[ 0 ] + '"]' );
+			if ( $checkbox.length ) {
+				$( pair[ 1 ] ).toggleClass( 'is-disabled', ! $checkbox.is( ':checked' ) );
+			}
+		} );
 	}
 
 	/**
@@ -288,7 +346,6 @@
 	}
 
 	$( function () {
-		// Color picker.
 		if ( $.fn.wpColorPicker ) {
 			$( '.fsf-color' ).wpColorPicker( {
 				change: function () {
@@ -311,7 +368,6 @@
 			refresh();
 		} );
 
-		// Copia shortcode al click.
 		$( document ).on( 'click', '.fsf-copy-field', function () {
 			var field = this;
 			field.select();

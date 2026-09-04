@@ -1,0 +1,53 @@
+name: Zip del plugin
+
+# Ad ogni push su main ricostruisce francy-stand-flip.zip, con dentro la cartella
+# "francy-stand-flip" già col nome giusto, e lo pubblica nella release "latest".
+# Link fisso da cui scaricarlo sempre:
+# https://github.com/tarabaz/Francy-stand-flip/releases/latest/download/francy-stand-flip.zip
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il repository
+        uses: actions/checkout@v4
+
+      - name: Prepara la cartella del plugin
+        run: |
+          mkdir -p build/francy-stand-flip
+          rsync -a \
+            --exclude 'build' \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'docs' \
+            --exclude 'CLAUDE.md' \
+            ./ build/francy-stand-flip/
+          cd build && zip -rq ../francy-stand-flip.zip francy-stand-flip
+          unzip -l ../francy-stand-flip.zip | head -20
+
+      - name: Allega lo zip all'esecuzione
+        uses: actions/upload-artifact@v4
+        with:
+          name: francy-stand-flip
+          path: francy-stand-flip.zip
+
+      - name: Aggiorna la release "latest"
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view latest >/dev/null 2>&1; then
+            gh release upload latest francy-stand-flip.zip --clobber
+          else
+            gh release create latest francy-stand-flip.zip \
+              --title "Ultima versione" \
+              --notes "Zip pronto da caricare in WordPress: Plugin → Aggiungi nuovo → Carica plugin."
+          fi

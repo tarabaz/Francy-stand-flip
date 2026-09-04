@@ -1,6 +1,11 @@
 # Note di progetto — Francy-stand-flip
 
-Plugin WordPress `francy-stand-flip/` per FrancyStore3D (vedi README.md per uso e shortcode).
+Plugin WordPress per FrancyStore3D (vedi README.md per uso e shortcode). **I file del plugin
+stanno nella radice del repository**: serve perché lo zip scaricato da GitHub sia installabile
+direttamente in WordPress. Non rimetterli in una sottocartella.
+
+Lo zip pubblicato nella release `latest` viene ricostruito da `.github/workflows/zip-plugin.yml`
+ad ogni push su `main`.
 
 ## Git — flusso richiesto da Valerio
 
@@ -29,6 +34,11 @@ conflitti, mai un force-push su `main`.
 
 ## Come sono costruite le misure del box
 
+I livelli del box sono, dal basso: `.fsf-box__inner` (sfondo), `.fsf-card`, `.fsf-stand`,
+`.fsf-content`. La carta sta **dietro** la foto dello stand: è una richiesta esplicita di Valerio,
+il prodotto è la foto. Sono tutti figli diretti di `.fsf-box`, non annidati, proprio per poterli
+impilare in quest'ordine.
+
 Le variabili CSS inline sono **numeri senza unità**; le unità si applicano nel CSS
 moltiplicando per `--fsf-u` (`1px` di fallback, `100cqw / larghezza-box` con container query).
 Chi aggiunge una nuova misura deve:
@@ -38,8 +48,17 @@ Chi aggiunge una nuova misura deve:
 3. replicare la stessa logica in `buildVars()` di `assets/js/admin.js`, altrimenti l'anteprima
    live si scosta dal front-end.
 
-Le scelte non numeriche (unità, lato immagine, on/off delle ombre) passano da classi generate
-in `FSF_Render::box_classes()` e replicate in `buildClasses()` nel JS.
+Le scelte non numeriche (unità, lato immagine, on/off delle ombre, foto libera, larghezza
+dinamica, stile del pulsante) passano da classi generate in `FSF_Render::box_classes()` e
+replicate in `buildClasses()` nel JS.
+
+Con la **larghezza dinamica** `--fsf-u` torna a `1px` e si usano le variabili `*-px-n` calcolate
+da PHP: chi aggiunge una misura che deve restare fissa in quella modalità deve esportare anche la
+sua versione in px.
+
+Avada sovrascrive colore e margini di `h3` e dei link: titolo, descrizione e pulsanti usano
+selettori rinforzati (`.fsf-box .fsf-content .fsf-title`) e `!important` sulle sole proprietà di
+colore. Non abbassare quella specificità.
 
 ## Verifica senza WordPress
 

@@ -29,6 +29,8 @@ class FSF_Settings {
 			// Box.
 			'box_w'              => 560,
 			'box_h'              => 320,
+			'fluid'              => 0,
+			'min_w'              => 380,
 			'radius'             => 24,
 			'bg_type'            => 'gradient',
 			'bg_color'           => '#1c1033',
@@ -65,6 +67,9 @@ class FSF_Settings {
 			'stand_pos'   => 'center',
 			'stand_inset' => 0,
 			'stand_fade'  => 1,
+			'stand_free'  => 0,
+			'stand_x'     => -4,
+			'stand_y'     => -8,
 
 			// Contenuti.
 			'inner_pad'      => 24,
@@ -78,6 +83,7 @@ class FSF_Settings {
 			'desc_lines'     => 2,
 
 			// Pulsanti.
+			'btn_post_style' => 'instagram',
 			'btn_size'      => 12,
 			'btn_radius'    => 999,
 			'btn_bg'        => '#ffffff',
@@ -107,7 +113,9 @@ class FSF_Settings {
 				'label'  => __( 'Box', 'francy-stand-flip' ),
 				'fields' => array(
 					'box_w'              => array( 'type' => 'number', 'label' => 'Larghezza massima box (px)', 'min' => 200, 'max' => 1400, 'step' => 1, 'help' => 'Il box resta proporzionale: sotto questa larghezza si rimpicciolisce mantenendo lo stesso aspetto.' ),
-					'box_h'              => array( 'type' => 'number', 'label' => 'Altezza box (px)', 'min' => 120, 'max' => 1200, 'step' => 1, 'help' => 'Usata come proporzione (larghezza / altezza), così su mobile non si deforma.' ),
+					'box_h'              => array( 'type' => 'number', 'label' => 'Altezza box (px)', 'min' => 120, 'max' => 1200, 'step' => 1, 'help' => 'Usata come proporzione (larghezza / altezza), così su mobile non si deforma. Con la larghezza dinamica diventa l\'altezza fissa del box.' ),
+					'fluid'              => array( 'type' => 'checkbox', 'label' => 'Larghezza dinamica', 'help' => 'Il box occupa tutto lo spazio disponibile: niente larghezza massima, solo una minima. Altezza e dimensioni dei testi restano quelle di progetto, la foto dello stand si allarga. Utile per shortcode messi uno sotto l\'altro a tutta pagina.' ),
+					'min_w'              => array( 'type' => 'number', 'label' => 'Larghezza minima (px)', 'min' => 200, 'max' => 1200, 'step' => 1, 'help' => 'Usata solo con la larghezza dinamica attiva.' ),
 					'radius'             => array( 'type' => 'number', 'label' => 'Arrotondamento angoli (px)', 'min' => 0, 'max' => 200, 'step' => 1 ),
 					'bg_type'            => array( 'type' => 'select', 'label' => 'Tipo di sfondo', 'options' => array( 'solid' => 'Colore pieno', 'gradient' => 'Sfumatura' ) ),
 					'bg_color'           => array( 'type' => 'color', 'label' => 'Colore sfondo' ),
@@ -149,7 +157,10 @@ class FSF_Settings {
 					'stand_fit'   => array( 'type' => 'select', 'label' => 'Adattamento immagine', 'options' => array( 'cover' => 'Riempi (cover)', 'contain' => 'Contieni (contain)' ) ),
 					'stand_pos'   => array( 'type' => 'select', 'label' => 'Messa a fuoco immagine', 'options' => array( 'center' => 'Centro', 'top' => 'Alto', 'bottom' => 'Basso', 'left' => 'Sinistra', 'right' => 'Destra' ) ),
 					'stand_inset' => array( 'type' => 'number', 'label' => 'Margine interno immagine (px)', 'min' => 0, 'max' => 80, 'step' => 1 ),
-					'stand_fade'  => array( 'type' => 'checkbox', 'label' => 'Sfumatura di raccordo verso i testi' ),
+					'stand_fade'  => array( 'type' => 'checkbox', 'label' => 'Sfumatura di raccordo verso i testi', 'help' => 'Non si applica alla foto libera.' ),
+					'stand_free'  => array( 'type' => 'checkbox', 'label' => 'Foto libera: può sbordare dal box', 'help' => 'Come la carta. La foto non viene più ritagliata nel riquadro: usa le coordinate qui sotto e conviene una foto scontornata in PNG. La carta resta comunque dietro la foto.' ),
+					'stand_x'     => array( 'type' => 'number', 'label' => 'Foto libera: distanza dal lato (%)', 'min' => -100, 'max' => 100, 'step' => 0.5, 'help' => 'Distanza dal lato scelto sopra. Negativa = la foto esce dal box.' ),
+					'stand_y'     => array( 'type' => 'number', 'label' => 'Foto libera: distanza dall\'alto (%)', 'min' => -100, 'max' => 100, 'step' => 0.5 ),
 				),
 			),
 			'content' => array(
@@ -169,9 +180,10 @@ class FSF_Settings {
 			'buttons' => array(
 				'label'  => __( 'Pulsanti Instagram', 'francy-stand-flip' ),
 				'fields' => array(
+					'btn_post_style' => array( 'type' => 'select', 'label' => 'Stile pulsante post', 'options' => array( 'instagram' => 'Colori Instagram (sfumatura)', 'custom' => 'Colori personalizzati' ) ),
 					'btn_size'    => array( 'type' => 'number', 'label' => 'Dimensione testo (px)', 'min' => 8, 'max' => 28, 'step' => 1 ),
 					'btn_radius'  => array( 'type' => 'number', 'label' => 'Arrotondamento (px)', 'min' => 0, 'max' => 999, 'step' => 1 ),
-					'btn_bg'      => array( 'type' => 'color', 'label' => 'Pulsante post: sfondo' ),
+					'btn_bg'      => array( 'type' => 'color', 'label' => 'Pulsante post: sfondo', 'help' => 'Usato solo con lo stile "colori personalizzati".' ),
 					'btn_color'   => array( 'type' => 'color', 'label' => 'Pulsante post: testo' ),
 					'btn2_color'  => array( 'type' => 'color', 'label' => 'Pulsante reel: testo e bordo' ),
 					'btn_icon'    => array( 'type' => 'checkbox', 'label' => 'Mostra icona Instagram' ),

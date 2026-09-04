@@ -26,6 +26,10 @@ class FSF_Metabox {
 			'_fsf_card_y'     => 'float',
 			'_fsf_card_w'     => 'float',
 			'_fsf_card_rot'   => 'float',
+			'_fsf_stand_ovr'  => 'bool',
+			'_fsf_stand_x'    => 'float',
+			'_fsf_stand_y'    => 'float',
+			'_fsf_stand_w'    => 'float',
 			'_fsf_bg_ovr'     => 'bool',
 			'_fsf_bg_color'   => 'color',
 			'_fsf_bg_color2'  => 'color',
@@ -134,6 +138,25 @@ class FSF_Metabox {
 		$bg2      = self::meta( $post->ID, '_fsf_bg_color2', $settings['bg_color2'] );
 		$unit     = 'percent' === $settings['card_unit'] ? '%' : 'px';
 		$w_unit   = 'percent' === $settings['card_w_unit'] ? '%' : 'px';
+
+		$stand_free = ! empty( $settings['stand_free'] );
+		$stand_ovr  = (int) self::meta( $post->ID, '_fsf_stand_ovr', 0 );
+		$stand_x    = self::meta( $post->ID, '_fsf_stand_x', $stand_free ? $settings['stand_x'] : 50 );
+		$stand_y    = self::meta( $post->ID, '_fsf_stand_y', $stand_free ? $settings['stand_y'] : 50 );
+		$stand_w    = self::meta( $post->ID, '_fsf_stand_w', $settings['stand_w'] );
+		$stand_min  = $stand_free ? -100 : 0;
+
+		if ( $stand_free ) {
+			$stand_x_label = __( 'Distanza dal lato (%)', 'francy-stand-flip' );
+			$stand_y_label = __( 'Distanza dall\'alto (%)', 'francy-stand-flip' );
+			$stand_w_label = __( 'Larghezza foto (% del box)', 'francy-stand-flip' );
+			$stand_hint    = __( 'La foto libera è attiva: qui sposti e ridimensioni la foto di questo stand, valori negativi la fanno uscire dal box.', 'francy-stand-flip' );
+		} else {
+			$stand_x_label = __( 'Messa a fuoco orizzontale (0-100%)', 'francy-stand-flip' );
+			$stand_y_label = __( 'Messa a fuoco verticale (0-100%)', 'francy-stand-flip' );
+			$stand_w_label = __( 'Larghezza area foto (% del box)', 'francy-stand-flip' );
+			$stand_hint    = __( 'La foto è dentro il riquadro: qui scegli quale parte dell\'immagine si vede (50/50 = centro) e quanto spazio occupa.', 'francy-stand-flip' );
+		}
 		?>
 		<div class="fsf-meta-grid">
 			<div class="fsf-meta-col">
@@ -160,6 +183,28 @@ class FSF_Metabox {
 					<p>
 						<label for="fsf-card-rot"><?php esc_html_e( 'Rotazione (deg)', 'francy-stand-flip' ); ?></label>
 						<input type="number" step="0.5" min="-90" max="90" id="fsf-card-rot" name="_fsf_card_rot" value="<?php echo esc_attr( $card_rot ); ?>" data-fsf-key="card_rot">
+					</p>
+				</div>
+				<hr>
+				<p>
+					<label>
+						<input type="checkbox" name="_fsf_stand_ovr" value="1" data-fsf-key="_fsf_stand_ovr" <?php checked( 1, $stand_ovr ); ?>>
+						<strong><?php esc_html_e( 'Posiziona la foto dello stand solo per questo stand', 'francy-stand-flip' ); ?></strong>
+					</label>
+					<span class="description"><?php echo esc_html( $stand_hint ); ?></span>
+				</p>
+				<div class="fsf-override-stand">
+					<p>
+						<label for="fsf-stand-x"><?php echo esc_html( $stand_x_label ); ?></label>
+						<input type="number" step="0.5" min="<?php echo esc_attr( $stand_min ); ?>" max="100" id="fsf-stand-x" name="_fsf_stand_x" value="<?php echo esc_attr( $stand_x ); ?>" data-fsf-key="stand_x">
+					</p>
+					<p>
+						<label for="fsf-stand-y"><?php echo esc_html( $stand_y_label ); ?></label>
+						<input type="number" step="0.5" min="<?php echo esc_attr( $stand_min ); ?>" max="100" id="fsf-stand-y" name="_fsf_stand_y" value="<?php echo esc_attr( $stand_y ); ?>" data-fsf-key="stand_y">
+					</p>
+					<p>
+						<label for="fsf-stand-w"><?php echo esc_html( $stand_w_label ); ?></label>
+						<input type="number" step="0.5" min="1" max="200" id="fsf-stand-w" name="_fsf_stand_w" value="<?php echo esc_attr( $stand_w ); ?>" data-fsf-key="stand_w">
 					</p>
 				</div>
 				<hr>

@@ -1,0 +1,581 @@
+/**
+ * Francy Stand Flip — CSS front-end.
+ *
+ * Misure: tutto deriva da --fsf-u, che vale 1px come fallback e
+ * "100cqw / larghezza-box" dove le container query sono supportate, così il box
+ * e il suo contenuto scalano insieme. In modalità larghezza dinamica --fsf-u
+ * torna a 1px e si usano le misure in px calcolate da PHP.
+ *
+ * Livelli (dal basso): sfondo del box, carta, foto dello stand, testi.
+ * La carta sta sempre DIETRO la foto: il prodotto è la foto.
+ */
+
+/* ---------- Griglia ---------- */
+
+.fsf-grid {
+	--fsf-cols: 2;
+	--fsf-cols-t: 2;
+	--fsf-cols-m: 1;
+	--fsf-gap: 44px;
+	--fsf-gap-min: 0px;
+	--fsf-rgap-min: 0px;
+	--fsf-gpad-t: 8px;
+	--fsf-gpad-r: 8px;
+	--fsf-gpad-b: 8px;
+	--fsf-gpad-l: 8px;
+
+	display: grid;
+	grid-template-columns: repeat(var(--fsf-cols), minmax(0, 1fr));
+	column-gap: max(var(--fsf-gap), var(--fsf-gap-min));
+	row-gap: max(var(--fsf-gap), var(--fsf-rgap-min));
+	padding: var(--fsf-gpad-t) var(--fsf-gpad-r) var(--fsf-gpad-b) var(--fsf-gpad-l);
+	box-sizing: border-box;
+	overflow: visible;
+}
+
+.fsf-grid--single {
+	justify-items: center;
+}
+
+@media (max-width: 1024px) {
+	.fsf-grid {
+		grid-template-columns: repeat(var(--fsf-cols-t), minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 767px) {
+	.fsf-grid {
+		grid-template-columns: repeat(var(--fsf-cols-m), minmax(0, 1fr));
+	}
+}
+
+/* ---------- Wrapper del box (contenitore delle container query) ---------- */
+
+.fsf-item {
+	position: relative;
+	width: 100%;
+	max-width: var(--fsf-box-max, 560px);
+	margin-inline: auto;
+	min-width: 0;
+	box-sizing: border-box;
+	overflow: visible;
+	container-type: inline-size;
+}
+
+/* Larghezza dinamica: nessun massimo, solo un minimo */
+.fsf-item--fluid {
+	max-width: none;
+	min-width: min(calc(var(--fsf-minw-n, 380) * 1px), 100%);
+}
+
+/* ---------- Box ---------- */
+
+.fsf-box {
+	--fsf-u: 1px;
+
+	position: relative;
+	display: block;
+	width: 100%;
+	aspect-ratio: var(--fsf-ratio, 560 / 320);
+	overflow: visible;
+	font-family: inherit;
+}
+
+@supports (width: 1cqw) {
+	.fsf-box {
+		--fsf-u: calc(100cqw / var(--fsf-boxw, 560));
+	}
+}
+
+/* In larghezza dinamica il box cresce in orizzontale ma tiene altezza e
+   dimensioni di testo di progetto: niente scaling proporzionale. */
+.fsf-box--fluid {
+	--fsf-u: 1px;
+
+	aspect-ratio: auto;
+	height: calc(var(--fsf-boxh-n, 320) * 1px);
+}
+
+.fsf-box *,
+.fsf-box *::before,
+.fsf-box *::after {
+	box-sizing: border-box;
+}
+
+.fsf-box [hidden] {
+	display: none !important;
+}
+
+/* Livello 1: sfondo, bordo e ombra del box */
+.fsf-box__inner {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	overflow: hidden;
+	border-radius: calc(var(--fsf-radius-n, 24) * var(--fsf-u));
+	background: var(--fsf-bg, #1c1033);
+	border: calc(var(--fsf-border-n, 0) * var(--fsf-u)) solid var(--fsf-border-color, transparent);
+	box-shadow: 0 calc(var(--fsf-bsy-n, 18) * var(--fsf-u)) calc(var(--fsf-bsb-n, 40) * var(--fsf-u)) var(--fsf-bs-color, rgba(0, 0, 0, 0.35));
+}
+
+.fsf-box--no-shadow .fsf-box__inner {
+	box-shadow: none;
+}
+
+/* ---------- Livello 2: carta ---------- */
+
+.fsf-card {
+	position: absolute;
+	z-index: 2;
+	left: calc(var(--fsf-card-x-n, -10) * 1%);
+	top: calc(var(--fsf-card-y-n, -18) * 1%);
+	width: calc(var(--fsf-card-w-n, 25) * 1%);
+	transform: rotate(var(--fsf-card-rot, -8deg));
+	transform-origin: center center;
+	filter: drop-shadow(calc(var(--fsf-csx-n, 6) * var(--fsf-u)) calc(var(--fsf-csy-n, 12) * var(--fsf-u)) calc(var(--fsf-csb-n, 16) * var(--fsf-u)) var(--fsf-cs-color, rgba(0, 0, 0, 0.45)));
+	pointer-events: none;
+}
+
+/* Coordinate della carta in px (scalano comunque col box) */
+.fsf-box--pos-px .fsf-card {
+	left: calc(var(--fsf-card-x-n, -40) * var(--fsf-u));
+	top: calc(var(--fsf-card-y-n, -30) * var(--fsf-u));
+}
+
+.fsf-box--cw-px .fsf-card {
+	width: calc(var(--fsf-card-w-n, 170) * var(--fsf-u));
+}
+
+.fsf-box--no-card-shadow .fsf-card {
+	filter: none;
+}
+
+.fsf-card__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-width: none;
+	border-radius: calc(var(--fsf-card-radius-n, 10) * var(--fsf-u));
+}
+
+/* ---------- Livello 3: foto dello stand ---------- */
+
+.fsf-stand {
+	position: absolute;
+	z-index: 3;
+	top: calc(var(--fsf-stand-inset-n, 0) * var(--fsf-u));
+	right: calc(var(--fsf-stand-inset-n, 0) * var(--fsf-u));
+	bottom: calc(var(--fsf-stand-inset-n, 0) * var(--fsf-u));
+	left: auto;
+	width: calc(var(--fsf-stand-w-n, 44) * 1%);
+	overflow: hidden;
+	border-radius: 0 calc(var(--fsf-radius-n, 24) * var(--fsf-u)) calc(var(--fsf-radius-n, 24) * var(--fsf-u)) 0;
+}
+
+.fsf-box--flip .fsf-stand {
+	right: auto;
+	left: calc(var(--fsf-stand-inset-n, 0) * var(--fsf-u));
+	border-radius: calc(var(--fsf-radius-n, 24) * var(--fsf-u)) 0 0 calc(var(--fsf-radius-n, 24) * var(--fsf-u));
+}
+
+/* Con margine interno la foto prende tutti gli angoli arrotondati */
+.fsf-box--stand-inset .fsf-stand,
+.fsf-box--flip.fsf-box--stand-inset .fsf-stand {
+	border-radius: calc(max(var(--fsf-radius-n, 24) - var(--fsf-stand-inset-n, 0), 4) * var(--fsf-u));
+}
+
+.fsf-stand__img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: var(--fsf-stand-fit, cover);
+	object-position: var(--fsf-stand-objpos, center);
+	border-radius: inherit;
+}
+
+.fsf-box--fade .fsf-stand {
+	-webkit-mask-image: linear-gradient(to left, #000 62%, transparent 100%);
+	mask-image: linear-gradient(to left, #000 62%, transparent 100%);
+}
+
+.fsf-box--flip.fsf-box--fade .fsf-stand {
+	-webkit-mask-image: linear-gradient(to right, #000 62%, transparent 100%);
+	mask-image: linear-gradient(to right, #000 62%, transparent 100%);
+}
+
+/* Foto libera: può sbordare dal box come la carta.
+   X è la distanza dal lato scelto (negativa = esce), Y dall'alto. */
+.fsf-box--stand-free .fsf-stand {
+	top: calc(var(--fsf-stand-y-n, 0) * 1%);
+	right: calc(var(--fsf-stand-x-n, 0) * 1%);
+	bottom: auto;
+	left: auto;
+	width: calc(var(--fsf-stand-w-n, 44) * 1%);
+	height: auto;
+	overflow: visible;
+	border-radius: 0;
+	-webkit-mask-image: none;
+	mask-image: none;
+}
+
+.fsf-box--stand-free.fsf-box--flip .fsf-stand {
+	right: auto;
+	left: calc(var(--fsf-stand-x-n, 0) * 1%);
+}
+
+.fsf-box--stand-free .fsf-stand__img {
+	height: auto;
+	object-fit: contain;
+	border-radius: 0;
+	filter: drop-shadow(calc(var(--fsf-csx-n, 6) * var(--fsf-u)) calc(var(--fsf-csy-n, 12) * var(--fsf-u)) calc(var(--fsf-csb-n, 16) * var(--fsf-u) * 1.2) var(--fsf-cs-color, rgba(0, 0, 0, 0.45)));
+}
+
+.fsf-box--stand-free.fsf-box--no-card-shadow .fsf-stand__img {
+	filter: none;
+}
+
+/* ---------- Livello 4: testi ---------- */
+
+.fsf-content {
+	position: absolute;
+	z-index: 4;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: var(--fsf-valign, flex-end);
+	align-items: flex-start;
+	gap: calc(9 * var(--fsf-u));
+	width: calc(var(--fsf-content-w-n, 64) * 1%);
+	padding: calc(var(--fsf-pad-n, 24) * var(--fsf-u));
+	text-align: left;
+}
+
+.fsf-box--flip .fsf-content {
+	left: auto;
+	right: 0;
+}
+
+/* Selettori "forti" e !important sui colori: temi come Avada impongono
+   colore e margini di h3 e dei link con specificità alta. */
+.fsf-box .fsf-content .fsf-title {
+	margin: 0 !important;
+	padding: 0 !important;
+	font-size: calc(var(--fsf-title-n, 24) * var(--fsf-u));
+	line-height: 1.14;
+	font-weight: var(--fsf-title-weight, 700);
+	color: var(--fsf-title-color, #fff) !important;
+	letter-spacing: -0.01em;
+	overflow-wrap: break-word;
+	text-transform: none;
+	text-shadow: none;
+}
+
+.fsf-box .fsf-content .fsf-desc {
+	margin: 0 !important;
+	padding: 0 !important;
+	font-size: calc(var(--fsf-desc-n, 14) * var(--fsf-u));
+	line-height: 1.45;
+	color: var(--fsf-desc-color, #ded7ee) !important;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--fsf-desc-lines, 2);
+	line-clamp: var(--fsf-desc-lines, 2);
+	overflow: hidden;
+	overflow-wrap: break-word;
+}
+
+/* ---------- Pulsanti ---------- */
+
+.fsf-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: calc(8 * var(--fsf-u));
+	margin-top: calc(3 * var(--fsf-u));
+}
+
+.fsf-box .fsf-actions a.fsf-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: calc(6 * var(--fsf-u));
+	padding: calc(9 * var(--fsf-u)) calc(15 * var(--fsf-u));
+	border: calc(1.5 * var(--fsf-u)) solid transparent;
+	border-radius: calc(var(--fsf-btnr-n, 999) * var(--fsf-u));
+	font-size: calc(var(--fsf-btn-n, 12) * var(--fsf-u));
+	font-weight: 600;
+	line-height: 1.1;
+	text-decoration: none !important;
+	box-shadow: none;
+	transition: transform 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+}
+
+.fsf-box .fsf-actions a.fsf-btn:hover,
+.fsf-box .fsf-actions a.fsf-btn:focus {
+	transform: translateY(calc(-1 * var(--fsf-u)));
+	filter: brightness(1.06);
+}
+
+.fsf-box .fsf-actions a.fsf-btn:focus-visible {
+	outline: calc(2 * var(--fsf-u)) solid var(--fsf-btn2-color, #fff);
+	outline-offset: calc(2 * var(--fsf-u));
+}
+
+.fsf-box .fsf-actions a.fsf-btn--primary,
+.fsf-box .fsf-actions a.fsf-btn--primary:hover,
+.fsf-box .fsf-actions a.fsf-btn--primary:focus,
+.fsf-box .fsf-actions a.fsf-btn--primary:visited {
+	background: var(--fsf-btn-bg, #fff);
+	color: var(--fsf-btn-color, #1c1033) !important;
+	border-color: var(--fsf-btn-bg, #fff);
+}
+
+/* Pulsante "post" con i colori Instagram */
+.fsf-box--ig-btn .fsf-actions a.fsf-btn--primary,
+.fsf-box--ig-btn .fsf-actions a.fsf-btn--primary:hover,
+.fsf-box--ig-btn .fsf-actions a.fsf-btn--primary:focus,
+.fsf-box--ig-btn .fsf-actions a.fsf-btn--primary:visited {
+	background: #d6249f;
+	background: linear-gradient(45deg, #f09433 0%, #e6683c 22%, #dc2743 48%, #cc2366 72%, #bc1888 100%);
+	color: #ffffff !important;
+	border-color: transparent;
+}
+
+.fsf-box .fsf-actions a.fsf-btn--ghost,
+.fsf-box .fsf-actions a.fsf-btn--ghost:hover,
+.fsf-box .fsf-actions a.fsf-btn--ghost:focus,
+.fsf-box .fsf-actions a.fsf-btn--ghost:visited {
+	background: transparent;
+	color: var(--fsf-btn2-color, #fff) !important;
+	border-color: currentColor;
+}
+
+.fsf-box .fsf-btn .fsf-ico {
+	width: 1.15em;
+	height: 1.15em;
+	flex: 0 0 auto;
+	display: block;
+	fill: currentColor;
+}
+
+/* ---------- Larghezza dinamica: misure fisse in px ---------- */
+
+.fsf-box--fluid .fsf-card {
+	left: calc(var(--fsf-card-xpx-n, -56) * 1px);
+	top: calc(var(--fsf-card-ypx-n, -58) * 1px);
+	width: calc(var(--fsf-card-wpx-n, 140) * 1px);
+}
+
+.fsf-box--fluid .fsf-content {
+	width: calc(var(--fsf-content-wpx-n, 358) * 1px);
+	max-width: 70%;
+}
+
+.fsf-box--fluid.fsf-box--stand-free .fsf-stand {
+	right: calc(var(--fsf-stand-xpx-n, 0) * 1px);
+	top: calc(var(--fsf-stand-ypx-n, 0) * 1px);
+	width: calc(var(--fsf-stand-wpx-n, 246) * 1px);
+}
+
+.fsf-box--fluid.fsf-box--stand-free.fsf-box--flip .fsf-stand {
+	right: auto;
+	left: calc(var(--fsf-stand-xpx-n, 0) * 1px);
+}
+
+/* ---------- Utility ---------- */
+
+.fsf-box .screen-reader-text {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.fsf-empty {
+	padding: 14px 18px;
+	border: 1px dashed rgba(0, 0, 0, 0.25);
+	border-radius: 8px;
+	font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fsf-box .fsf-actions a.fsf-btn {
+		transition: none;
+	}
+
+	.fsf-box .fsf-actions a.fsf-btn:hover,
+	.fsf-box .fsf-actions a.fsf-btn:focus {
+		transform: none;
+	}
+}
+
+/* ---------- Box stretto: layout impilato ----------
+   Sotto ~430px di larghezza del box la divisione testo/immagine non regge e i
+   testi scalati diventerebbero illeggibili: foto sopra, testi sotto, altezza
+   automatica e dimensioni minime di sicurezza. La carta resta dietro la foto.
+   Le regole sono duplicate in @container (larghezza reale del box) e in @media
+   (fallback per browser senza container query). */
+
+@container (max-width: 430px) {
+	.fsf-box {
+		display: flex !important;
+		flex-direction: column !important;
+		aspect-ratio: auto !important;
+		height: auto !important;
+	}
+
+	.fsf-box .fsf-stand {
+		position: relative !important;
+		order: 1;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 16 / 9;
+		overflow: hidden !important;
+		border-radius: calc(var(--fsf-radius-n, 24) * 1px) calc(var(--fsf-radius-n, 24) * 1px) 0 0 !important;
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+
+	.fsf-box .fsf-stand__img {
+		height: 100%;
+		object-fit: cover;
+		filter: none;
+	}
+
+	.fsf-box .fsf-content {
+		position: relative !important;
+		order: 2;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		width: 100% !important;
+		max-width: none !important;
+		gap: 10px;
+		padding: 18px;
+	}
+
+	.fsf-box .fsf-content .fsf-title {
+		font-size: max(17px, calc(var(--fsf-title-n, 24) * var(--fsf-u)));
+	}
+
+	.fsf-box .fsf-content .fsf-desc {
+		font-size: max(13px, calc(var(--fsf-desc-n, 14) * var(--fsf-u)));
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+	}
+
+	.fsf-box .fsf-actions a.fsf-btn {
+		font-size: max(12px, calc(var(--fsf-btn-n, 12) * var(--fsf-u)));
+		padding: 10px 16px;
+		border-width: 1.5px;
+		border-radius: min(calc(var(--fsf-btnr-n, 999) * 1px), 999px);
+	}
+
+	.fsf-box .fsf-card {
+		width: max(100px, calc(var(--fsf-card-w-n, 25) * 1%));
+		filter: drop-shadow(3px 6px 10px var(--fsf-cs-color, rgba(0, 0, 0, 0.45)));
+	}
+
+	.fsf-box .fsf-card__img {
+		border-radius: 8px;
+	}
+}
+
+@media (max-width: 520px) {
+	.fsf-box {
+		display: flex !important;
+		flex-direction: column !important;
+		aspect-ratio: auto !important;
+		height: auto !important;
+	}
+
+	.fsf-box .fsf-stand {
+		position: relative !important;
+		order: 1;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 16 / 9;
+		overflow: hidden !important;
+		border-radius: calc(var(--fsf-radius-n, 24) * 1px) calc(var(--fsf-radius-n, 24) * 1px) 0 0 !important;
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+
+	.fsf-box .fsf-stand__img {
+		height: 100%;
+		object-fit: cover;
+		filter: none;
+	}
+
+	.fsf-box .fsf-content {
+		position: relative !important;
+		order: 2;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		width: 100% !important;
+		max-width: none !important;
+		gap: 10px;
+		padding: 18px;
+	}
+
+	.fsf-box .fsf-content .fsf-title {
+		font-size: max(17px, calc(var(--fsf-title-n, 24) * var(--fsf-u)));
+	}
+
+	.fsf-box .fsf-content .fsf-desc {
+		font-size: max(13px, calc(var(--fsf-desc-n, 14) * var(--fsf-u)));
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+	}
+
+	.fsf-box .fsf-actions a.fsf-btn {
+		font-size: max(12px, calc(var(--fsf-btn-n, 12) * var(--fsf-u)));
+		padding: 10px 16px;
+		border-width: 1.5px;
+		border-radius: min(calc(var(--fsf-btnr-n, 999) * 1px), 999px);
+	}
+
+	.fsf-box .fsf-card {
+		width: max(100px, calc(var(--fsf-card-w-n, 25) * 1%));
+	}
+
+	.fsf-grid {
+		column-gap: var(--fsf-gap);
+		row-gap: max(var(--fsf-gap), 24px);
+		padding-top: min(var(--fsf-gpad-t), 42px);
+		padding-right: min(var(--fsf-gpad-r), 14px);
+		padding-bottom: min(var(--fsf-gpad-b), 14px);
+		padding-left: min(var(--fsf-gpad-l), 30px);
+	}
+}
+
+/* ---------- Compatibilità Avada / Fusion Builder ----------
+   Alcune colonne di Avada tagliano il contenuto che sborda:
+   qui riapriamo l'overflow solo sui contenitori che ospitano la griglia. */
+
+@supports selector(:has(*)) {
+	.fusion-layout-column:has(> .fusion-column-wrapper > .fsf-grid),
+	.fusion-column-wrapper:has(> .fsf-grid),
+	.fusion-text:has(> .fsf-grid),
+	.fusion-builder-row:has(.fsf-grid) {
+		overflow: visible !important;
+	}
+}
